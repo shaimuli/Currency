@@ -123,4 +123,3 @@ G:\react\Clalit\server\server\obj\Debug\netcoreapp3.1\server.RazorTargetAssembly
 G:\react\Clalit\server\server\obj\Debug\netcoreapp3.1\server.csproj.CopyComplete
 G:\react\Clalit\server\server\obj\Debug\netcoreapp3.1\server.genruntimeconfig.cache
 G:\react\Clalit\server\server\obj\Debug\netcoreapp3.1\server.csproj.AssemblyReference.cache
-G:\react\Clalit\server\server\bin\Debug\netcoreapp3.1\Currency.json

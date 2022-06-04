@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using server.Helper;
 using System;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Xml;
 
 namespace server.Controllers
@@ -26,38 +24,12 @@ namespace server.Controllers
             _config = config;
         }
 
+        //call to the url currency and convert xml to json
         [HttpGet]
         public CurrenciesList Get()
         {
-            ReadXmlToJson(); //call from Offline(task) function to update the json file to update the json every x time.
-            return GetList();
-        }
-
-        private CurrenciesList GetList()
-        {
-            CurrencyCache cache = new CurrencyCache();
-            double duration = 60;
-            CurrenciesList currencies = null;
-            if (duration > 0 && cache.Exists())
-            {
-                currencies = cache.Get();
-            }
-            else
-            {
-                string jsonReader = string.Empty;
-                using (StreamReader r = new StreamReader("./Currency.json"))
-                {
-                    jsonReader = r.ReadToEnd();
-                    currencies = JsonConvert.DeserializeObject<CurrenciesList>(jsonReader);
-                    cache.Set(currencies);
-                }
-            }
-            return currencies;
-        }
-
-        private void ReadXmlToJson()
-        {
             string url = _config.GetValue<string>("Data:Url");
+            CurrenciesList currencies = null;
             try
             {
                 WebRequest webRequest = HttpWebRequest.Create(url);
@@ -75,14 +47,14 @@ namespace server.Controllers
                         }
                     }
                     string jsonText = JsonConvert.SerializeXmlNode(doc);
-                    var json = JsonConvert.DeserializeObject(jsonText);
-                    System.IO.File.WriteAllText("Currency.json", jsonText, Encoding.UTF8);
+                    currencies = JsonConvert.DeserializeObject<CurrenciesList>(jsonText);
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
             }
+            return currencies;
         }
     }
 }
