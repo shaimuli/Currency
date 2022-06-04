@@ -29,15 +29,22 @@ namespace server.Controllers
         {
             return GetList();
         }
-        
+
         private CurrenciesList GetList()
         {
             string url = _config.GetValue<string>("Data:Url");
             CurrenciesList currencies = ReadXmlToJson(url);
-            string jsonReader = string.Empty;
-            using (StreamReader r = new StreamReader("./Currency.json"))
+            if (currencies != null)
             {
-                jsonReader = r.ReadToEnd();
+                string jsonReader = string.Empty;
+                using (StreamReader r = new StreamReader("./Currency.json"))
+                {
+                    jsonReader = r.ReadToEnd();
+                }
+            }
+            else
+            {
+                //call the data from memory cache
             }
             return currencies;
         }
