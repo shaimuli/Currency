@@ -37,7 +37,7 @@ function Currency() {
         currency.currency
           .filter((currency) => currency.change < 0)
           .map((currency, index) => (
-            <Card key={currency.currencycode + index}>
+            <Card key={currency.currencycode}>
               <CardContent>
                 <Typography color="textPrimary">
                   {currency.currencyCode}
