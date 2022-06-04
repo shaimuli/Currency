@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using server.Helper;
+using System;
 using System.IO;
 using System.Net;
 using System.Text;
@@ -27,51 +29,60 @@ namespace server.Controllers
         [HttpGet]
         public CurrenciesList Get()
         {
+            ReadXmlToJson(); //call from Offline(task) function to update the json file to update the json every x time.
             return GetList();
         }
 
         private CurrenciesList GetList()
         {
-            string url = _config.GetValue<string>("Data:Url");
-            CurrenciesList currencies = ReadXmlToJson(url);
-            if (currencies != null)
+            CurrencyCache cache = new CurrencyCache();
+            double duration = 60;
+            CurrenciesList currencies = null;
+            if (duration > 0 && cache.Exists())
+            {
+                currencies = cache.Get();
+            }
+            else
             {
                 string jsonReader = string.Empty;
                 using (StreamReader r = new StreamReader("./Currency.json"))
                 {
                     jsonReader = r.ReadToEnd();
+                    currencies = JsonConvert.DeserializeObject<CurrenciesList>(jsonReader);
+                    cache.Set(currencies);
                 }
-            }
-            else
-            {
-                //call the data from memory cache
             }
             return currencies;
         }
 
-        private static CurrenciesList ReadXmlToJson(string url)
+        private void ReadXmlToJson()
         {
-            CurrenciesList currencies = null;
-            WebRequest webRequest = HttpWebRequest.Create(url);
-            HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
-            using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+            string url = _config.GetValue<string>("Data:Url");
+            try
             {
-                XmlDocument doc = new XmlDocument();
-                string xml = sr.ReadToEnd();
-                doc.LoadXml(xml);
-                foreach (XmlNode node in doc)
+                WebRequest webRequest = HttpWebRequest.Create(url);
+                HttpWebResponse response = (HttpWebResponse)webRequest.GetResponse();
+                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
                 {
-                    if (node.NodeType == XmlNodeType.XmlDeclaration)
+                    XmlDocument doc = new XmlDocument();
+                    string xml = sr.ReadToEnd();
+                    doc.LoadXml(xml);
+                    foreach (XmlNode node in doc)
                     {
-                        doc.RemoveChild(node);
+                        if (node.NodeType == XmlNodeType.XmlDeclaration)
+                        {
+                            doc.RemoveChild(node);
+                        }
                     }
+                    string jsonText = JsonConvert.SerializeXmlNode(doc);
+                    var json = JsonConvert.DeserializeObject(jsonText);
+                    System.IO.File.WriteAllText("Currency.json", jsonText, Encoding.UTF8);
                 }
-                string jsonText = JsonConvert.SerializeXmlNode(doc);
-                var json = JsonConvert.DeserializeObject(jsonText);
-                System.IO.File.WriteAllText("Currency.json", jsonText, Encoding.UTF8);
-                currencies = JsonConvert.DeserializeObject<CurrenciesList>(jsonText);
             }
-            return currencies;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
         }
     }
 }
