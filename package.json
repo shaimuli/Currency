@@ -1,0 +1,17 @@
+{
+    "name": "todo",
+    "version": "1.0.0",
+    "scripts": {
+        "client": "SET NODE_OPTIONS=--openssl-legacy-provider && cd client && npm start",
+        "server": "SET NODE_OPTIONS=--openssl-legacy-provider && cd server && dotnet run --project server",
+        "dev": "SET NODE_OPTIONS=--openssl-legacy-provider && concurrently --kill-others-on-fail \"npm run server\" \"npm run client\""
+    },
+    "dependencies": {
+        "@material-ui/core": "^4.11.4",
+        "body-parser": "^1.18.3",
+        "express": "^4.16.4"
+    },
+    "devDependencies": {
+        "concurrently": "^7.2.0"
+    }
+}
