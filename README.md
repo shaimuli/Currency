@@ -9,6 +9,6 @@ You should now have the development version running on your computer and accessi
 
 ## description
 * I converted the xml to Json in the server to seperate the logic. 
-I Created a function that downloads the json to the disk and can be used as an offline task that we can run it (optional: with cache) ,at any time we chose.
+I Created a function that downloads the json to the disk and can be used as an offline task that we can run it (optional: with cache) ,at any time we chose,
 in order to prevent from many users to reach the third party url and make an overload traffic.
 The reading in react project will be on the file downloaded
